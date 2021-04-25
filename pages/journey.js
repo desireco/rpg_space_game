@@ -20,7 +20,7 @@ const JourneyPage = () => {
 
   async function handleTravelClick() {
     try {
-      const eventResponse = await fetch("http://localhost:3000/api/event");
+      const eventResponse = await fetch("/api/event");
       const response = await eventResponse.json();
       setEvents((events) => [...events, response]);
     } catch (error) {
