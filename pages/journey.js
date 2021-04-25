@@ -81,12 +81,33 @@ const JourneyPage = () => {
           <div className={styles.star} />
           <div className={styles.star2} />
           <div className={styles.star3} />
+          <div className="flex flex-col justify-between w-full">
+            <div className="flex">
+              <img
+                alt="star"
+                src="./space/star_1.png"
+                className="h-32 w-32 transform scale-150 mx-auto self-top mt-20"
+              />
 
-          <img
-            alt="spaceship"
-            src="./ship3.png"
-            className="h-32 w-32 transform -rotate-90 scale-150 mx-auto self-end mb-20"
-          />
+              <img
+                alt="spaceship"
+                src="./ship6.png"
+                className="h-32 w-32 transform rotate-90 scale-150 mx-auto self-top mt-20"
+              />
+
+              <img
+                alt="spaceship"
+                src="./space/green_planet_1.png"
+                className="h-32 w-32 transform scale-150 mx-auto self-top mt-20"
+              />
+            </div>
+
+            <img
+              alt="spaceship"
+              src="./ship3.png"
+              className="h-32 w-32 transform -rotate-90 scale-150 mx-auto self-end mb-20"
+            />
+          </div>
         </div>
 
         <div className="flex flex-1 flex-col bg-gray-900 text-white p-4 justify-between h-screen">
