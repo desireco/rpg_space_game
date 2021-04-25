@@ -1,15 +1,28 @@
 import Head from "next/head";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import EnemyEventLog from "../components/journey/EnemyEventLog";
+import SpaceEventLog from "../components/journey/SpaceEventLog";
 import styles from "../styles/journey.module.css";
 
 const JourneyPage = () => {
   const [events, setEvents] = useState([]);
+  const eventLogBottomAnchorRef = useRef(null);
+
+  useEffect(() => {
+    if (events) {
+      scrollToBottomLog();
+    }
+  }, [events]);
+
+  function scrollToBottomLog() {
+    eventLogBottomAnchorRef.current.scrollIntoView({ behavior: "smooth" });
+  }
 
   async function handleTravelClick() {
     try {
       const eventResponse = await fetch("http://localhost:3000/api/event");
       const response = await eventResponse.json();
-      setEvents([...events, response]);
+      setEvents((events) => [...events, response]);
     } catch (error) {
       console.log("Error!: ", error);
     }
@@ -22,9 +35,37 @@ const JourneyPage = () => {
 
     return (
       <>
-        {events.map((event) => (
-          <p className="mb-2 italic">{event.message}</p>
-        ))}
+        {events.map((event) => {
+          const { eventType } = event;
+
+          switch (eventType) {
+            case 0:
+              return (
+                <SpaceEventLog
+                  event={event}
+                  onActionClick={scrollToBottomLog}
+                />
+              );
+            case 1:
+              return (
+                <EnemyEventLog
+                  event={event}
+                  onActionClick={scrollToBottomLog}
+                />
+              );
+
+            case 2:
+              return (
+                <p className="pb-4 italic">
+                  <code>Travel Log: </code>
+                  {event.message}
+                </p>
+              );
+
+            default:
+              return null;
+          }
+        })}
       </>
     );
   }
@@ -48,13 +89,15 @@ const JourneyPage = () => {
           />
         </div>
 
-        <div className="flex flex-1 flex-col bg-gray-900 text-white p-4 justify-between">
-          <div className="flex flex-col p-4 border-gray-400 border-2 rounded h-full">
+        <div className="flex flex-1 flex-col bg-gray-900 text-white p-4 justify-between h-screen">
+          <div className="flex flex-col p-4 border-gray-400 border-2 rounded h-full overflow-scroll">
             <p>
               <code>Ship:</code> Welcome back! i missed you
             </p>
 
             {renderTravelLogs()}
+
+            <div ref={eventLogBottomAnchorRef} />
           </div>
           <button
             className="text-xl p-4 border-gray-400 bg-gray-900 border-2 rounded mt-8 hover:bg-gray-800"
