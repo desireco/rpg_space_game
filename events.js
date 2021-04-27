@@ -82,6 +82,10 @@ export const SPACE_EVENTS = [
         type: 1,
         message: "No",
       },
+      {
+        type: 2,
+        message: "Setup Mining",
+      },
     ],
     outcomes: [
       { type: 0, message: "Thats... a nice name i guess" },

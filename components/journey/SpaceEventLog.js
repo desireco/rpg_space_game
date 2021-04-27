@@ -9,9 +9,12 @@ const SpaceEventLog = ({ event, onActionClick }) => {
   }
 
   const handleActionClick = (actionType) => () => {
+    if (actionType === 2) {
+      // coming soon
+    }
     setActionTypeTriggered(actionType);
     setIsOutcomeVisible(true);
-    onActionClick()
+    onActionClick();
   };
 
   function renderEventActions() {

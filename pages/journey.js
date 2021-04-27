@@ -2,9 +2,11 @@ import Head from "next/head";
 import { useEffect, useRef, useState } from "react";
 import EnemyEventLog from "../components/journey/EnemyEventLog";
 import SpaceEventLog from "../components/journey/SpaceEventLog";
+import { EventTypes } from "../constants";
 import styles from "../styles/journey.module.css";
 
 const JourneyPage = () => {
+  const [currentEvent, setCurrentEvent] = useState(null);
   const [events, setEvents] = useState([]);
   const eventLogBottomAnchorRef = useRef(null);
 
@@ -23,6 +25,7 @@ const JourneyPage = () => {
       const eventResponse = await fetch("/api/event");
       const response = await eventResponse.json();
       setEvents((events) => [...events, response]);
+      setCurrentEvent(response);
     } catch (error) {
       console.log("Error!: ", error);
     }
@@ -70,6 +73,19 @@ const JourneyPage = () => {
     );
   }
 
+  function renderSpaceBody() {
+    if (currentEvent && currentEvent.eventType === EventTypes.SpaceEvent) {
+      console.log("currentEvent: ", currentEvent);
+      return (
+        <img
+          alt={currentEvent.eventData.spaceObject.name}
+          src={`./space/${currentEvent.eventData.spaceObject.asset}`}
+          className="h-32 w-32 transform scale-150 mx-auto self-top mt-20"
+        />
+      );
+    }
+  }
+
   return (
     <div>
       <Head>
@@ -82,25 +98,7 @@ const JourneyPage = () => {
           <div className={styles.star2} />
           <div className={styles.star3} />
           <div className="flex flex-col justify-between w-full">
-            <div className="flex">
-              <img
-                alt="star"
-                src="./space/star_1.png"
-                className="h-32 w-32 transform scale-150 mx-auto self-top mt-20"
-              />
-
-              <img
-                alt="spaceship"
-                src="./ship6.png"
-                className="h-32 w-32 transform rotate-90 scale-150 mx-auto self-top mt-20"
-              />
-
-              <img
-                alt="spaceship"
-                src="./space/green_planet_1.png"
-                className="h-32 w-32 transform scale-150 mx-auto self-top mt-20"
-              />
-            </div>
+            <div className="flex">{renderSpaceBody()}</div>
 
             <img
               alt="spaceship"
