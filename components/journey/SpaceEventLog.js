@@ -51,9 +51,9 @@ const SpaceEventLog = ({ event, onActionClick }) => {
     <div className="pb-4">
       <p className="text-lg mb-3">{getEventMessage()}</p>
 
-      <div className="flex">{renderEventActions()}</div>
+      {/* <div className="flex">{renderEventActions()}</div>
 
-      <div className="flex">{renderEventOutcomes()}</div>
+      <div className="flex">{renderEventOutcomes()}</div> */}
     </div>
   );
 };
