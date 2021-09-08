@@ -1,155 +1,92 @@
 import Head from "next/head";
 import { useEffect, useRef, useState } from "react";
+import Particles from "react-tsparticles";
 import EnemyEventLog from "../components/journey/EnemyEventLog";
+import HUD from "../components/journey/HUD";
 import SpaceEventLog from "../components/journey/SpaceEventLog";
 import { EventTypes } from "../constants";
 import styles from "../styles/journey.module.css";
 
 const JourneyPage = () => {
   const [currentEvent, setCurrentEvent] = useState(null);
-  const [events, setEvents] = useState([]);
-  const eventLogBottomAnchorRef = useRef(null);
-
-  useEffect(() => {
-    if (events) {
-      scrollToBottomLog();
-    }
-  }, [events]);
-
-  function scrollToBottomLog() {
-    eventLogBottomAnchorRef.current.scrollIntoView({ behavior: "smooth" });
-  }
 
   async function handleTravelClick() {
     try {
       const eventResponse = await fetch("/api/event");
       const response = await eventResponse.json();
-      setEvents((events) => [...events, response]);
       setCurrentEvent(response);
     } catch (error) {
       console.log("Error!: ", error);
     }
   }
 
-  function renderEventAction() {
-    return (
-      <div className="flex flex-col p-2 border-t-2 border-gray-400">
-        <p className="mb-3">Enemy!</p>
-
-        <p className="mb-3">
-          The space cartel is requesting money for protection
-        </p>
-
-        <div className="flex flex-col">
-          <div className="mb-3">
-            <button className="mr-2 rounded bg-red-700 hover:bg-red-600 py-2 px-4">
-              Attack!
-            </button>
-
-            <button className="mr-2 rounded bg-red-700 hover:bg-red-600 py-2 px-4">
-              Run away
-            </button>
-
-            <button className="mr-2 rounded bg-red-700 hover:bg-red-600 py-2 px-4">
-              Talk
-            </button>
-          </div>
-
-          <div className="flex">
-            <div className="mr-3 flex flex-col items-center">
-              <p>Attack Damage</p>
-              <p>80</p>
-            </div>
-
-            <div className="mr-3 flex flex-col items-center">
-              <p>Dmg Received</p>
-              <p>200</p>
-            </div>
-
-            <div className="mr-3 flex flex-col items-center">
-              <p>Exp gained</p>
-              <p>143</p>
-            </div>
-          </div>
-
-          <div className="mr-3 flex flex-col">
-            <p>Loot</p>
-
-            <div className="flex">
-              <p className="mr-2 border border-gray-400 p-1 cursor-pointer">
-                50 gold
-              </p>
-
-              <p className="mr-2 border border-gray-400 p-1 cursor-pointer">
-                2 Battery
-              </p>
-
-              <p className="mr-2 border border-gray-400 p-1 cursor-pointer">
-                1 Plutonium
-              </p>
-
-              <p className="mr-2 border border-gray-400 p-1 cursor-pointer">
-                1 craft recipe
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  function renderTravelLogs() {
-    if (!events) {
+  function renderEventAsset() {
+    if (!currentEvent) {
       return null;
     }
 
-    return (
-      <>
-        {events.map((event) => {
-          const { eventType } = event;
+    console.log("currentEvent: ", currentEvent);
 
-          switch (eventType) {
-            case 0:
-              return (
-                <SpaceEventLog
-                  event={event}
-                  onActionClick={scrollToBottomLog}
-                />
-              );
-            case 1:
-              return (
-                <EnemyEventLog
-                  event={event}
-                  onActionClick={scrollToBottomLog}
-                />
-              );
+    const { eventData } = currentEvent;
 
-            case 2:
-              return (
-                <p className="pb-4 italic">
-                  <code>Travel Log: </code>
-                  {event.message}
-                </p>
-              );
+    switch (currentEvent.eventType) {
+      case EventTypes.SpaceEvent:
+        return (
+          <img
+            alt={eventData.name}
+            src={`./space/${eventData.asset}`}
+            className="h-32 w-32 transform md:scale-150"
+          />
+        );
 
-            default:
-              return null;
-          }
-        })}
-      </>
-    );
+      case EventTypes.EnemyEvent:
+        return (
+          <div className="flex flex-col">
+            <div className="flex mb-4">
+              <p className="mx-2 text-white">HP</p>
+
+              <div className="shadow w-full bg-red-100 mr-2">
+                <div className="bg-red-700 text-xs leading-none h-full w-4/4" />
+              </div>
+            </div>
+
+            <img
+              alt={eventData.asset}
+              src={`./enemies/${eventData.asset}`}
+              className="h-32 w-32 transform"
+            />
+          </div>
+        );
+
+      default:
+        return null;
+    }
   }
 
-  function renderSpaceBody() {
-    if (currentEvent && currentEvent.eventType === EventTypes.SpaceEvent) {
-      console.log("currentEvent: ", currentEvent);
-      return (
-        <img
-          alt={currentEvent.eventData.spaceObject.name}
-          src={`./space/${currentEvent.eventData.spaceObject.asset}`}
-          className="h-32 w-32 transform scale-150 mx-auto self-top mt-20"
-        />
-      );
+  function renderTravelEvent() {
+    if (!currentEvent) {
+      return null;
+    }
+
+    const { eventType, message } = currentEvent;
+
+    switch (eventType) {
+      case 0:
+        return <SpaceEventLog event={currentEvent} />;
+
+      case 1:
+        return <EnemyEventLog event={currentEvent} />;
+
+      case 2:
+        return (
+          <p className="pb-4 italic">
+            <code>Travel Log: </code>
+            {message}
+          </p>
+        );
+
+      default:
+        return null;
     }
   }
 
@@ -159,210 +96,213 @@ const JourneyPage = () => {
         <title>Player Journey</title>
       </Head>
 
-      <main className="flex flex-col md:flex-row">
-        <div className={styles.background}>
-          <div className={styles.star} />
-          <div className={styles.star2} />
-          <div className={styles.star3} />
-          <div className="flex flex-col w-full justify-between">
-            <div className="flex self-start h-32 w-32">{renderSpaceBody()}</div>
+      <main className="flex flex-col h-screen">
+        <Particles
+          id="spaceStartParticles"
+          options={{
+            fullScreen: {
+              enable: true,
+            },
+            fpsLimit: 60,
+            particles: {
+              groups: {
+                z5000: {
+                  number: {
+                    value: 70,
+                  },
+                  zIndex: {
+                    value: 5000,
+                  },
+                },
+                z7500: {
+                  number: {
+                    value: 30,
+                  },
+                  zIndex: {
+                    value: 75,
+                  },
+                },
+                z2500: {
+                  number: {
+                    value: 50,
+                  },
+                  zIndex: {
+                    value: 25,
+                  },
+                },
+                z1000: {
+                  number: {
+                    value: 30,
+                  },
+                  zIndex: {
+                    value: 10,
+                  },
+                },
+              },
+              number: {
+                value: 200,
+                density: {
+                  enable: false,
+                  value_area: 800,
+                },
+              },
+              color: {
+                value: "#fff",
+                animation: {
+                  enable: false,
+                  speed: 20,
+                  sync: true,
+                },
+              },
+              shape: {
+                type: "square",
+              },
+              opacity: {
+                value: 1,
+                random: false,
+                animation: {
+                  enable: false,
+                  speed: 3,
+                  minimumValue: 0.1,
+                  sync: false,
+                },
+              },
+              size: {
+                value: 2,
+              },
+              links: {
+                enable: false,
+                distance: 100,
+                color: "#ffffff",
+                opacity: 0.4,
+                width: 1,
+              },
+              move: {
+                angle: {
+                  value: 10,
+                  offset: 0,
+                },
+                enable: true,
+                speed: 1,
+                direction: "left",
+                random: false,
+                straight: true,
+                outModes: {
+                  default: "out",
+                },
+                attract: {
+                  enable: false,
+                  rotateX: 600,
+                  rotateY: 1200,
+                },
+              },
+              zIndex: {
+                value: 5,
+                opacityRate: 0.5,
+              },
+            },
+            interactivity: {
+              detectsOn: "canvas",
+              events: {
+                onHover: {
+                  enable: false,
+                  mode: "repulse",
+                },
+                onClick: {
+                  enable: true,
+                  mode: "push",
+                },
+                resize: true,
+              },
+              modes: {
+                grab: {
+                  distance: 400,
+                  links: {
+                    opacity: 1,
+                  },
+                },
+                bubble: {
+                  distance: 400,
+                  size: 40,
+                  duration: 2,
+                  opacity: 0.8,
+                },
+                repulse: {
+                  distance: 200,
+                },
+                push: {
+                  quantity: 4,
+                  groups: ["z5000", "z7500", "z2500", "z1000"],
+                },
+                remove: {
+                  quantity: 2,
+                },
+              },
+            },
+            detectRetina: true,
+            background: {
+              color: "#1c1d2d",
+              image: "",
+              position: "50% 50%",
+              repeat: "no-repeat",
+              size: "cover",
+            },
+            emitters: {
+              position: {
+                y: 55,
+                x: -30,
+              },
+              rate: {
+                delay: 7,
+                quantity: 1,
+              },
+              size: {
+                width: 0,
+                height: 0,
+              },
+            },
+          }}
+        />
+
+        <div className="flex justify-between items-center h-full md:w-2/3 self-center">
+          <div className="flex flex-col">
+            <div className="flex">
+              <p className="mx-2 text-white">HP</p>
+
+              <div className="shadow w-full bg-red-100 mr-2">
+                <div className="bg-red-700 text-xs leading-none h-full w-3/4" />
+              </div>
+            </div>
 
             <img
               alt="spaceship"
               src="./ship3.png"
-              className="h-32 w-32 transform -rotate-90 scale-150 mx-auto self-center"
+              className="h-32 w-32 transform md:scale-150 ml-4"
             />
-
-            <div className="w-full self-end flex flex-col">
-              <div className="flex justify-evenly my-2">
-                <div className="flex flex-1">
-                  <p className="mx-2">Health</p>
-
-                  <div className="shadow w-full bg-red-100 mr-2">
-                    <div className="bg-red-700 text-xs leading-none h-full w-3/4" />
-                  </div>
-                </div>
-
-                <div className="flex flex-1">
-                  <p className="mr-2">Exp.</p>
-
-                  <div className="shadow w-full bg-purple-100 mr-2">
-                    <div className="bg-purple-800 text-xs leading-none h-full w-1/4" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="border-b-2 border-gray-200 border-solid">
-                <ul className="flex cursor-pointer">
-                  <li className="py-2 px-6 bg-white text-black mr-0.5 w-full">
-                    Attributes
-                  </li>
-                  <li className="py-2 px-6 bg-gray-400 text-gray-500 mr-0.5 w-full">
-                    Ship
-                  </li>
-                  <li className="py-2 px-6 bg-gray-400 text-gray-500 mr-0.5 w-full">
-                    Storage
-                  </li>
-                  <li className="py-2 px-6 bg-gray-400 rounded-t-md text-gray-500 mr-0.5 w-full">
-                    Craft
-                  </li>
-                </ul>
-              </div>
-
-              <div className="flex flex-1">
-                <div className="flex flex-col flex-1 bg-white text-black p-2">
-                  <p className="text-gray-900 mb-3">Ship attributes</p>
-
-                  <div className="flex">
-                    <div className="flex flex-col mr-4">
-                      <p className="text-black mb-1">Attack</p>
-                      <p className="text-black mb-1">Defense</p>
-                      <p className="text-black mb-1">Speed</p>
-                      <p className="text-black mb-1">A.I.</p>
-                    </div>
-                    <div className="flex flex-col flex-1">
-                      <div className="flex mb-1">
-                        <p>0</p>
-
-                        <button className="h-6 w-10 bg-blue-600 mx-2 rounded text-white">
-                          +
-                        </button>
-
-                        <button className="h-6 w-6 bg-yellow-500 rounded-full">
-                          i
-                        </button>
-                      </div>
-
-                      <div className="flex mb-1">
-                        <p>0</p>
-
-                        <button className="h-6 w-10 bg-blue-600 mx-2 rounded text-white">
-                          +
-                        </button>
-
-                        <button className="h-6 w-6 bg-yellow-500 rounded-full">
-                          i
-                        </button>
-                      </div>
-
-                      <div className="flex mb-1">
-                        <p>0</p>
-
-                        <button className="h-6 w-10 bg-blue-600 mx-2 rounded text-white">
-                          +
-                        </button>
-
-                        <button className="h-6 w-6 bg-yellow-500 rounded-full">
-                          i
-                        </button>
-                      </div>
-
-                      <div className="flex mb-1">
-                        <p>0</p>
-
-                        <button className="h-6 w-10 bg-blue-600 mx-2 rounded text-white">
-                          +
-                        </button>
-
-                        <button className="h-6 w-6 bg-yellow-500 rounded-full">
-                          i
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex flex-col flex-1 bg-white text-black p-2">
-                  <p className="text-gray-900 mb-3">Your attributes</p>
-
-                  <div className="flex">
-                    <div className="flex flex-col mr-4">
-                      <p className="text-black mb-1">Intelligence</p>
-                      <p className="text-black mb-1">Social</p>
-                      <p className="text-black mb-1">Repair(?)</p>
-                      <p className="text-black mb-1">Fortune(luck)</p>
-                    </div>
-                    <div className="flex flex-col flex-1">
-                      <div className="flex mb-1">
-                        <p>-10</p>
-
-                        <button className="h-6 w-10 bg-blue-600 mx-2 rounded text-white">
-                          +
-                        </button>
-
-                        <button className="h-6 w-6 bg-yellow-500 rounded-full">
-                          i
-                        </button>
-                      </div>
-
-                      <div className="flex mb-1">
-                        <p>0</p>
-
-                        <button className="h-6 w-10 bg-blue-600 mx-2 rounded text-white">
-                          +
-                        </button>
-
-                        <button className="h-6 w-6 bg-yellow-500 rounded-full">
-                          i
-                        </button>
-                      </div>
-
-                      <div className="flex mb-1">
-                        <p>0</p>
-
-                        <button className="h-6 w-10 bg-blue-600 mx-2 rounded text-white">
-                          +
-                        </button>
-
-                        <button className="h-6 w-6 bg-yellow-500 rounded-full">
-                          i
-                        </button>
-                      </div>
-
-                      <div className="flex mb-1">
-                        <p>0</p>
-
-                        <button className="h-6 w-10 bg-blue-600 mx-2 rounded text-white">
-                          +
-                        </button>
-
-                        <button className="h-6 w-6 bg-yellow-500 rounded-full">
-                          i
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
+
+          <div className="flex h-32 w-32 mr-20">{renderEventAsset()}</div>
         </div>
 
-        <div className="flex flex-1 flex-col bg-gray-900 text-white p-4 justify-between h-screen">
-          <div className="flex flex-col border-gray-400 border-2 rounded h-full">
-            <div className="flex flex-col p-2 flex-1">
-              <p>
-                <code>Ship:</code> Welcome back! i missed you
-              </p>
+        <div className="flex bg-gray-900 flex-col-reverse md:flex-row">
+          <HUD />
 
-              <div className="flex flex-col ">
-                {renderTravelLogs()}
-              </div>
+          <div className="flex flex-1 flex-col text-white p-4 justify-between">
+            <div className="text-white">{renderTravelEvent()}</div>
 
-              <div ref={eventLogBottomAnchorRef} />
-            </div>
-
-            {renderEventAction()}
+            <button
+              className="text-xl p-4 border-gray-400 bg-gray-900 border-2 rounded mt-8 hover:bg-gray-800"
+              onClick={handleTravelClick}
+            >
+              Travel
+            </button>
           </div>
-
-          <button
-            className="text-xl p-4 border-gray-400 bg-gray-900 border-2 rounded mt-8 hover:bg-gray-800"
-            onClick={handleTravelClick}
-          >
-            Travel
-          </button>
         </div>
       </main>
+
+      {/* <div className="absolute h-1/2 bottom-0 left-0 right-0 bg-pink-500">
+        <div className="flex bg-white p-4 m-4 rounded h-full"></div>
+      </div> */}
     </div>
   );
 };

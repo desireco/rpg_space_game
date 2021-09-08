@@ -13,6 +13,8 @@ const ISLAND_PLANETS_ASSETS = ["island_planet_1.png"];
 const LAVA_PLANETS_ASSETS = ["lava_planet_1.png"];
 const STARS_ASSETS = ["star_1.png"];
 
+// Enemy assets
+
 const ASTEROID = { name: "Asteroid", asset: getRandomFrom(ASTEROIDS_ASSETS) };
 const DRY_PLANET = {
   id: 0,
@@ -28,23 +30,46 @@ const GREEN_PLANET = {
   id: 2,
   name: "Green Planet",
   asset: getRandomFrom(GREEN_PLANETS_ASSETS),
+  resources: ["tin", "copper", "iron", "silver", "gold", "oil"],
+  weather: "25",
+  intelligent: true,
+  enemies: true,
 };
 const ICE_PLANET = {
   id: 3,
   name: "Ice Planet",
   asset: getRandomFrom(ICE_PLANETS_ASSETS),
+  resources: ["tin", "copper", "iron", "silver"],
+  weather: "-15",
+  intelligent: true,
+  enemies: true,
 };
 const ISLAND_PLANET = {
   id: 4,
   name: "Island Planet",
   asset: getRandomFrom(ISLAND_PLANETS_ASSETS),
+  resources: ["tin", "copper", "iron", "silver", "wood"],
+  weather: "45",
+  intelligent: false,
+  enemies: true,
 };
 const LAVA_PLANET = {
   id: 5,
   name: "Lava Planet",
   asset: getRandomFrom(LAVA_PLANETS_ASSETS),
+  resources: ["red diamonds"],
+  weather: "100",
+  intelligent: false,
+  enemies: true,
 };
-const STAR = { name: "Star", asset: getRandomFrom(STARS_ASSETS) };
+const STAR = {
+  name: "Star",
+  asset: getRandomFrom(STARS_ASSETS),
+  resources: [],
+  weather: "1000",
+  intelligent: false,
+  enemies: false,
+};
 const PLANETS = [
   ASTEROID,
   DRY_PLANET,
@@ -61,35 +86,24 @@ const event = {
   eventType: null, // 0 space, 1 enemy, 2 nothing
   eventData: {},
   message: "",
-  isEnemy: false,
   actions: [],
 };
 
 export const SPACE_EVENTS = [
   {
     ...event,
-    message: "You've found one ${planetType}, would you like to name it?",
+    message: "You've found one ${planetType}.",
     eventType: 0,
-    eventData: {
-      spaceObject: getRandomFrom(PLANETS),
-    },
+    eventData: getRandomFrom(PLANETS),
     actions: [
       {
         type: 0,
-        message: "Yes, its like my child",
+        message: "Name it",
       },
       {
         type: 1,
-        message: "No",
+        message: "Touch down",
       },
-      {
-        type: 2,
-        message: "Setup Mining",
-      },
-    ],
-    outcomes: [
-      { type: 0, message: "Thats... a nice name i guess" },
-      { type: 1, message: "Ok" },
     ],
   },
 ];
@@ -97,64 +111,24 @@ export const SPACE_EVENTS = [
 export const ENEMY_EVENTS = [
   {
     ...event,
-    message: "The space cartel is requesting money for protection",
+    message: "You encounter Aurun Drakueli from the Druekuelis",
     eventType: 1,
-    actions: [
-      {
-        type: 0,
-        message: "Attack!",
-      },
-      {
-        type: 1,
-        message: "Flee",
-      },
-    ],
-    outcomes: [
-      { type: 0, message: "You made them pay you instead! (exp+, money+)" },
-      { type: 1, message: "While scaping the cartel thugs hit you (health-)" },
-    ],
+    eventData: {
+      enemyId: 1,
+      enemyHp: 100,
+      asset: "aurun_drakueli.gif",
+    },
   },
   {
     ...event,
-    message: "Rogue Empire Gendarmerie are trying to board you!",
+    message: "A Demonic Essence has appeared!",
     eventType: 1,
-    actions: [
-      {
-        type: 0,
-        message: "Attack the traitors!",
-      },
-      {
-        type: 1,
-        message: "Run away",
-      },
-    ],
-    outcomes: [
-      { type: 0, message: "You manage to destroy them! (exp+, money+)" },
-      { type: 1, message: "You managed to space undamaged" },
-    ],
-  },
-  {
-    ...event,
-    message:
-      "You found an abandoned spaceship, upon inspection you realize that its full some sort of zombie people",
-    eventType: 1,
-    actions: [
-      {
-        type: 0,
-        message: "Aim to the head!",
-      },
-      {
-        type: 1,
-        message: "I don't like zombies!",
-      },
-    ],
-    outcomes: [
-      {
-        type: 0,
-        message: "You cleaned the ship and got loot! (exp+, money+, loot+)",
-      },
-      { type: 1, message: "They bite you a bit but you scaped (health-)" },
-    ],
+    eventData: {
+      enemyId: 2,
+      enemyHp: 300,
+      asset: "demonic_essence.gif",
+    },
+    eventButton: "Kill it",
   },
 ];
 
